@@ -1,37 +1,49 @@
 import arc.*;
 import java.awt.image.BufferedImage;
+import java.awt.Font;
+import java.awt.Color;
 
 
 public class CPTJeffrey{
 	public static void main(String[] args) {
-		Console con = new Console();
+		Console con = new Console("Jeff's Black Jack Game", 1280, 720);
 		// leaderboard file
 		
-		char charMenu = 'M';
-		while (charMenu != 'Q') {
-			if (charMenu == 'M') {
+		char charMenu = 'm';
+		while (charMenu != 'q') {
+			if (charMenu == 'm') {
 				// main menu
+				drawMainMenu(con);
 				
-				// Draw buttons;
-				con.println("Press 'P' to play, 'L' to check leaderboards, or 'Q' to quit.");
-				con.repaint();
+				while (charMenu == 'm') {
+					char charInput = con.getChar();
+					if (charInput == 'p' || charInput == 'v' || charInput == 'q' || charInput == 'h') {
+						charMenu = charInput;
+					}
+				}
 				
-				getMenuInput(con, charMenu, 'M');
-				con.clear();
-			} else if (charMenu == 'P') {
-				// play game
+			} else if (charMenu == 'p') {
+				// Play game
+				drawPregameMenu(con);
 				
-				con.println("What is your name? ");
+				// setup the reader to the typing box position
+				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n" + "                                           ");
 				String strName = con.readLine();
+				con.clear();
+				
 				int intMoney = 1000;
 				
 				play(con, strName, intMoney, charMenu);
 				
-			} else if (charMenu == 'L') {
-				// show leaderboard
+			} else if (charMenu == 'v') {
+				// Show leaderboard
 				con.println("Leaderboard");
 				con.repaint();
 				charMenu = con.readChar();
+				
+			} else if (charMenu == 'h') {
+				// Show helpful info
+				
 			}
 			
 		}
@@ -43,45 +55,60 @@ public class CPTJeffrey{
 	
 	// Plays one game of black jack, and returns p - play again, or l - lost
 	public static void play(Console con, String strName, int intMoney, char charMenu){
-		while (charMenu == 'P') {
+		while (charMenu == 'p') {
 			int[][] intDeck = generateDeck();
 			BufferedImage[] images = generateDeckImages(con);
 			
-			con.println("You have $" + intMoney);
-			
 			String strResult = game(con, intMoney);
+			
+			char charInput;
 			
 			// Win
 			if (strResult.equals("Win")) {
+				// Win screen
 				con.println("Win");
 				con.println("Play or quit");
-				char charInput = getPlayOrQuit(con);
+				
+				// Wait for the correct input
+				charInput = con.getChar();
+				while (charInput != 'p' && charInput != 'q') {
+					charInput = con.getChar();
+				}
+				
 				// Keep playing
-				if (charInput == 'P') continue;
+				if (charInput == 'p') continue;
 				
 				// Quit
 				else {
 					// Add to leaderboard
-					charMenu = 'L';
+					// System.out.println(); the logged thing
+					
+					charMenu = 'v';
 					return;
 				}
 			}
 			
 			// Lose
 			else {
+				// Lose screen
 				con.println("Lose");
 				con.println("Play or quit");
 				
 				// Add to leaderboard
+				// System.out.println(); the logged thing
 				
-				char charInput = getPlayOrQuit(con);
+				// Wait for the correct input
+				charInput = con.getChar();
+				while (charInput != 'p' && charInput != 'q') {
+					charInput = con.getChar();
+				}
 				
 				// Play again
-				if (charInput == 'P') return;
+				if (charInput == 'p') return;
 				
 				// Quit
 				else {
-					charMenu = 'L';
+					charMenu = 'v';
 					return;
 				}
 			}
@@ -89,9 +116,11 @@ public class CPTJeffrey{
 	}
 	
 	public static String game(Console con, int intMoney) {
+		drawGameMenu(con);
+		
 		con.println("Win or lose? (W, L)");
-		char charInput = con.readChar();
-		if (charInput == 'W') return "Win";
+		char charInput = con.getChar();
+		if (charInput == 'w') return "Win";
 		else return "Lose";
 	}
 	
@@ -159,51 +188,103 @@ public class CPTJeffrey{
 	
 	// Get string based on card value
 	public static String getValueString(int intValue) {
-		switch (intValue) {
-			case 1:
-				return "ace";
-			case 11:
-				return "jack";
-			case 12:
-				return "queen";
-			case 13:
-				return "king";
-			default:
-				return Integer.toString(intValue);
+		if (intValue == 1) {
+			return "ace";
+		} else if (intValue == 11) {
+			return "jack";
+		} else if (intValue == 12) {
+			return "queen";
+		} else if (intValue == 13) {
+			return "king";
+		} else {
+			return Integer.toString(intValue);
 		}
-	}
+}
 	
 	// Get string based on suit value
 	public static String getSuitString(int intSuit) {
-		switch (intSuit) {
-			case 1:
-				return "diamonds";
-			case 2:
-				return "clubs";
-			case 3:
-				return "hearts";
-			default:
-				return "spades";
+		if (intSuit == 1) {
+			return "diamonds";
+		} else if (intSuit == 2) {
+			return "clubs";
+		} else if (intSuit == 3) {
+			return "hearts";
+		} else {
+			return "spades";
 		}
 	}
 	
-	// Get menu input, filters out non-menu options
-	public static void getMenuInput(Console con, char charMenu, char charCurrentMenu) {
-		while (charMenu == charCurrentMenu) {
-			char charInput = (char) con.currentKey();
-			if (charInput == 'M' || charInput == 'P' || charInput == 'L' || charInput == 'Q') {
-				charMenu = charInput;
-			}
-		}
+	// Draws the main menu
+	public static void drawMainMenu(Console con) {
+		// background
+		con.drawImage(con.loadImage("MainMenuBackground.png"), 0, 0);
+		
+		// title / logo
+		con.drawImage(con.loadImage("BlackJackTitle.png"), (1280 - 750) / 2 , 0);
+		
+		con.setDrawFont(new Font("SansSerif", 0, 27));
+		
+		// play button
+		con.setDrawColor(new Color(50, 168, 82));
+		con.fillRoundRect(500, 280, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(p)lay", 640 - 40, 280 + 10);
+		
+		// leaderboard
+		con.setDrawColor(new Color(227, 227, 66));
+		con.fillRoundRect(500, 280 + 100, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(v)iew high scores", 640 - 120, 280 + 100 + 10);
+		
+		// help
+		//50, 146, 201
+		con.setDrawColor(new Color(50, 146, 201));
+		con.fillRoundRect(500, 280 + 200, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(h)elp", 640 - 40, 280 + 200 + 10);
+		
+		// quit
+		con.setDrawColor(new Color(217, 57, 33));
+		con.fillRoundRect(500, 280 + 300, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(q)uit", 640 - 40, 280 + 300 + 10);
+		
+		con.repaint();
 	}
 	
-	// Get play or quit input, filters out other options
-	public static char getPlayOrQuit(Console con) {
-		char charInput = 'A';
-		while (charInput != 'P' && charInput != 'Q') {
-			charInput = (char) con.currentKey();
-		}
-		return charInput;
+	// Draws the screen that asks for the player's name
+	public static void drawPregameMenu(Console con) {
+		// background
+		con.drawImage(con.loadImage("BrownBackground.png"), 0, 0);
+		
+		// what is your name text
+		con.setDrawColor(Color.white);
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 50));
+		con.drawString("What is your name?", 640 - 240, 200);
+		
+		// box for typing
+		con.setDrawColor(new Color(50, 50, 50));
+		con.fillRoundRect(498, 298, 284, 54, 35, 35);
+		
+		con.setDrawColor(new Color(56, 145, 89));
+		con.fillRoundRect(500, 300, 280, 50, 35, 35);
+		
+		con.repaint();
+	}
+	
+	// Draws the game screen
+	public static void drawGameMenu(Console con) {
+		// background
+		con.drawImage(con.loadImage("BlackJackTable.png"), 0, 0);
+		
+		// deck of cards
+		con.drawImage(con.loadImage("FaceDownCard.png"), 1030, 140);
+		
+		con.repaint();
 	}
 	
 	/*public static void hit();
