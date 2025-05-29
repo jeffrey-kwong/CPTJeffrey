@@ -9,14 +9,17 @@ public class CPTJeffrey{
 		Console con = new Console("Jeff's Black Jack Game", 1280, 720);
 		
 		char charMenu = 'm';
+		char charInput;
+		
 		while (charMenu != 'q') {
 			if (charMenu == 'm') {
 				// main menu
 				drawMainMenu(con);
 				
+				// Wait for one of the menu options
 				while (charMenu == 'm') {
-					char charInput = con.getChar();
-					if (charInput == 'p' || charInput == 'v' || charInput == 'q' || charInput == 'h') {
+					charInput = con.getChar();
+					if (charInput == 'p' || charInput == 'v' || charInput == 'q') {
 						charMenu = charInput;
 					}
 				}
@@ -34,19 +37,18 @@ public class CPTJeffrey{
 				
 			} else if (charMenu == 'v') {
 				// Show leaderboard
-				// readLeaderboard();
-				con.println("Leaderboard");
+				drawLeaderboard(con);
 				con.repaint();
-				charMenu = con.readChar();
 				
-			} else if (charMenu == 'h') {
-				// Show helpful info
-				
+				// Wait for either 'p' - play again or 'm' - (m)ain menu
+				while (charMenu == 'v') {
+					charInput = con.getChar();
+					if (charInput == 'p' || charInput == 'm') {
+						charMenu = charInput;
+					}
+				}
 			}
-			
 		}
-		
-		 // Close leaderboard file
 		 con.closeConsole();
 		 
 	}
@@ -58,6 +60,9 @@ public class CPTJeffrey{
 		int intResult = 0;
 		int intGames = 0;
 		char charInput;
+		
+		// Secret bonus for being named Jeffrey
+		if (strName.equalsIgnoreCase("jeffrey")) intMoney = 10000;
 		
 		// Game loop
 		while (true) {
@@ -76,13 +81,13 @@ public class CPTJeffrey{
 				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
 				
 				if (intResult == 0) {
-					con.drawString("You lost", 380, 270);
+					con.drawString("You lost", 370, 270);
 				}
 				else if (intResult == 1) {
-					con.drawString("You tied", 380, 270);
+					con.drawString("You tied", 370, 270);
 				}
 				else {
-					con.drawString("You won", 380, 270);
+					con.drawString("You won", 370, 270);
 				}
 				con.repaint();
 				con.sleep(1500);
@@ -91,16 +96,17 @@ public class CPTJeffrey{
 			// Quit
 			if (intBet == 0) {
 				// Add to leaderboard
-				addToLeaderboard(strName, intMoney);
-				System.out.println("Logged " + strName + " with score $" + intMoney + "in leaderboard");
+				addToLeaderboard(strName, intGames, intMoney);
+				System.out.println("Logged " + strName + " with score $" + intMoney + " in leaderboard");
 				
-				con.setDrawColor(Color.white);
-				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
 				
 				// Background, Nice Game!, and score screen
 				drawGameMenu(con);
-				con.drawString("Nice game!", 360, 10);
 				drawScore(con, strName, intMoney, intGames);
+				con.setDrawColor(Color.white);
+				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
+				con.drawString("Nice game!", 305, 10);
+				
 				con.repaint();
 				
 				// Wait for player to press quit
@@ -115,13 +121,15 @@ public class CPTJeffrey{
 			if (intMoney <= 0) {
 				
 				// Add to leaderboard
-				addToLeaderboard(strName, intMoney);
-				System.out.println("Logged " + strName + " with score $" + intMoney + "in leaderboard");
+				addToLeaderboard(strName, intGames, intMoney);
+				System.out.println("Logged " + strName + " with score $" + intMoney + " in leaderboard");
 				
 				// Background, Bankrupt!, and score screen
 				drawGameMenu(con);
-				con.drawString("Bankrupt!", 363, 10);
 				drawScore(con, strName, intMoney, intGames);
+				con.setDrawColor(Color.white);
+				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
+				con.drawString("Bankrupt!", 343, 10);
 				con.repaint();
 				
 				// Wait for the player to press 'p' to play again or 'q' to quit
@@ -137,6 +145,7 @@ public class CPTJeffrey{
 				else break;
 			}
 		}
+		
 		return 'v';
 	}
 	
@@ -346,32 +355,24 @@ public class CPTJeffrey{
 		
 		// play button
 		con.setDrawColor(new Color(50, 168, 82));
-		con.fillRoundRect(500, 280, 280, 70, 30, 30);
+		con.fillRoundRect(500, 320, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(p)lay", 640 - 40, 280 + 10);
+		con.drawString("(p)lay", 640 - 40, 320 + 10);
 		
 		// leaderboard
 		con.setDrawColor(new Color(227, 227, 66));
-		con.fillRoundRect(500, 280 + 100, 280, 70, 30, 30);
+		con.fillRoundRect(500, 320 + 100, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(v)iew high scores", 640 - 120, 280 + 100 + 10);
-		
-		// help
-		//50, 146, 201
-		con.setDrawColor(new Color(50, 146, 201));
-		con.fillRoundRect(500, 280 + 200, 280, 70, 30, 30);
-		
-		con.setDrawColor(Color.black);
-		con.drawString("(h)elp", 640 - 40, 280 + 200 + 10);
+		con.drawString("(v)iew high scores", 640 - 120, 320 + 100 + 10);
 		
 		// quit
 		con.setDrawColor(new Color(217, 57, 33));
-		con.fillRoundRect(500, 280 + 300, 280, 70, 30, 30);
+		con.fillRoundRect(500, 320 + 200, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(q)uit", 640 - 40, 280 + 300 + 10);
+		con.drawString("(q)uit", 640 - 40, 320 + 200 + 10);
 		
 		con.repaint();
 	}
@@ -472,7 +473,7 @@ public class CPTJeffrey{
 		con.setDrawFont(new Font("SansSerif", 0, 17));
 		con.setDrawColor(new Color(30, 30, 30));
 		
-		con.drawString("$" + (int) (intMoney * 0.5), 760, 500 + 40);
+		con.drawString("$" + (int) (Math.ceil(intMoney * 0.5)), 760, 500 + 40);
 		con.drawString("$" + intMoney, 1060, 500 + 40);
 	}
 	
@@ -526,7 +527,7 @@ public class CPTJeffrey{
 		con.setDrawFont(new Font("SansSerif", 0, 17));
 		con.setDrawColor(new Color(30, 30, 30));
 		
-		con.drawString("$" + (int) (intMoney * 0.5), 760, 500 + 40);
+		con.drawString("$" + (int) (Math.ceil(intMoney * 0.5)), 760, 500 + 40);
 		con.drawString("$" + intMoney, 1060, 500 + 40);
 	}
 	
@@ -555,7 +556,7 @@ public class CPTJeffrey{
 		} else if (charInput == '2') {
 			return 100;
 		} else if (charInput == '3') {
-			return (int) (intMoney * 0.5);
+			return (int) (Math.ceil(intMoney * 0.5));
 		} else if (charInput == '4') {
 			return intMoney;
 		} else if (charInput == '5') {
@@ -720,11 +721,195 @@ public class CPTJeffrey{
 	
 	// Draws the ending score in the game
 	public static void drawScore(Console con, String strName, int intMoney, int intGames) {
+		// Background
+		con.setDrawColor(new Color(0, 0, 0, 170));
+		con.fillRect(230, 0, 820, 720);
+		
+		// Statistics
+		con.setDrawColor(Color.white);
+		con.setDrawFont(new Font("SansSerif", 0, 50));
+		
+		con.drawString("Name: " + strName, 300, 300);
+		con.drawString("Total games: " + intGames, 300, 370);
+		con.drawString("Total money: $" + intMoney, 300, 440);
+		
+		con.setDrawFont(new Font("SansSerif", 0, 30));
+		con.drawString("Score saved to leaderboard!", 450, 530);
+		
+		// (q)uit
+		con.setDrawColor(new Color(161, 66, 245));
+		con.fillRoundRect(950, 600, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(q)uit", 1047, 600 + 8);
+	}
+	
+	public static String[][] getLeaderboard() {
+		TextInputFile leaderboard = new TextInputFile("leaderboard.txt");
+		String[][] leaderboardArray = new String[100][3];
+		
+		int inti = 0;
+		while (leaderboard.eof() == false) {
+			leaderboardArray[inti][0] = leaderboard.readLine();
+			leaderboardArray[inti][1] = leaderboard.readLine();
+			leaderboardArray[inti][2] = leaderboard.readLine();
+			inti++;
+		}
+		
+		leaderboard.close();
+		return leaderboardArray;
+	}
+	
+	public static void addToLeaderboard(String strName, int intGames, int intMoney) {
+		String[][] leaderboardArray = getLeaderboard();
+		
+		leaderboardArray = addToLeaderboardArray(leaderboardArray, strName, intGames, intMoney);
+		
+		int intLength = getLeaderboardArrayLength(leaderboardArray);
+		
+		TextOutputFile leaderboardOutput = new TextOutputFile("leaderboard.txt");
+		
+		for (int intElement = 0; intElement < intLength; intElement++) {
+			leaderboardOutput.println(leaderboardArray[intElement][0]);
+			leaderboardOutput.println(leaderboardArray[intElement][1]);
+			leaderboardOutput.println(leaderboardArray[intElement][2]);
+		}
+		
+		leaderboardOutput.close();
+		
 		
 	}
 	
-	// Adds an element to leaderboard.txt
-	public static void addToLeaderboard(String strName, int intMoney) {
+	public static int getLeaderboardLength() {
+		TextInputFile leaderboard = new TextInputFile("leaderboard.txt");
+		
+		int intLength = 0;
+		while (leaderboard.eof() == false) {
+			leaderboard.readLine();
+			leaderboard.readInt();
+			leaderboard.readInt();
+			intLength++;
+		}
+		
+		leaderboard.close();
+		return intLength;
+	}
+	
+	public static int getLeaderboardArrayLength(String[][] leaderboardArray) {
+		int intLength = 0;
+		while (leaderboardArray[intLength][0] != null) {
+			intLength++;
+		}
+		return intLength;
+	}
+	
+	public static String[][] addToLeaderboardArray(String[][] oldLeaderboardArray, String strName, int intGames, int intMoney) {
+		String[][] newLeaderboardArray = new String[100][3];
+		
+		// Find leaderboard length
+		int intLength = getLeaderboardLength();
+		
+		// Check if file is empty
+		if (intLength == 0) {
+			newLeaderboardArray[0][0] = strName;
+			newLeaderboardArray[0][1] = "" + intGames;
+			newLeaderboardArray[0][2] = "" + intMoney;
+			return newLeaderboardArray;
+		}
+		
+		// Find how many elements have greater or equal money than the new element
+		int intAbove = 0;
+		while (oldLeaderboardArray[intAbove][2] != null) {
+			if (Integer.parseInt(oldLeaderboardArray[intAbove][2]) >= intMoney) {
+				intAbove++;
+			}
+			else break;
+		}
+		
+		for (int intElement = 0; intElement < intLength + 1; intElement++) {
+			// Elements that are greater than the new one
+			if (intElement < intAbove) {
+				newLeaderboardArray[intElement][0] = oldLeaderboardArray[intElement][0];
+				newLeaderboardArray[intElement][1] = oldLeaderboardArray[intElement][1];
+				newLeaderboardArray[intElement][2] = oldLeaderboardArray[intElement][2];
+			}
+			// Elements that are below the new one
+			else if (intElement > intAbove) {
+				newLeaderboardArray[intElement][0] = oldLeaderboardArray[intElement - 1][0];
+				newLeaderboardArray[intElement][1] = oldLeaderboardArray[intElement - 1][1];
+				newLeaderboardArray[intElement][2] = oldLeaderboardArray[intElement - 1][2];
+			}
+			// The new element placement
+			else {
+				newLeaderboardArray[intElement][0] = strName;
+				newLeaderboardArray[intElement][1] = "" + intGames;
+				newLeaderboardArray[intElement][2] = "" + intMoney;
+			}
+		}
+		
+		return newLeaderboardArray;
+	}
+	
+	public static void drawLeaderboard(Console con) {
+		TextInputFile leaderboard = new TextInputFile("leaderboard.txt");
+		
+		// background
+		con.drawImage(con.loadImage("LeaderboardBackground.png"), 0, 0);
+		
+		con.setDrawColor(Color.white);
+		
+		// Title
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 100));
+		con.drawString("Leaderboard", 300, 10);
+		
+		// Headings
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 20));
+		
+		// Rank
+		con.drawString("Rank", 330, 160);
+		// Name
+		con.drawString("Player", 430, 160);
+		// Games
+		con.drawString("Games", 720, 160);
+		// Money
+		con.drawString("Money", 840, 160);
+		
+		con.fillRoundRect(250,  160 + 38, 780, 8, 8, 16);
+		
+		// Elements
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 30));
+		
+		int intElement = 1;
+		int inty;
+		while (leaderboard.eof() == false && intElement < 10) {
+			inty = 160 + 45 * intElement;
+			// Rank
+			con.drawString("" + intElement, 330, inty);
+			// Name
+			con.drawString(leaderboard.readLine(), 430, inty);
+			// Games
+			con.drawString("" + leaderboard.readInt(), 720, inty);
+			// Money
+			con.drawString("$" + leaderboard.readInt(), 840, inty);
+			
+			con.fillRoundRect(280, inty + 45, 720, 4, 5, 5);
+			intElement++;
+		}
+		
+		// (m)ain menu
+		con.setDrawColor(new Color(227, 227, 66));
+		con.fillRoundRect(50, 620, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(m)ain menu", 50 + 42, 620 + 10);
+		
+		// (p)lay
+		con.setDrawColor(new Color(50, 168, 82));
+		con.fillRoundRect(950, 620, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(p)lay", 950 + 94, 620 + 10);
 		
 	}
+	
 }
