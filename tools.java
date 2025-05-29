@@ -13,8 +13,8 @@ public class tools{
 		int intGames = 0;
 		char charInput;
 		
-		// Secret bonus for being named Jeffrey
-		if (strName.equalsIgnoreCase("jeffrey")) intMoney = 10000;
+		// Secret bonus for being named statitan
+		if (strName.equalsIgnoreCase("statitan")) intMoney = 10000;
 		
 		// Game loop
 		while (true) {
