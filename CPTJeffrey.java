@@ -7,7 +7,6 @@ import java.awt.Color;
 public class CPTJeffrey{
 	public static void main(String[] args) {
 		Console con = new Console("Jeff's Black Jack Game", 1280, 720);
-		// leaderboard file
 		
 		char charMenu = 'm';
 		while (charMenu != 'q') {
@@ -31,10 +30,11 @@ public class CPTJeffrey{
 				String strName = con.readLine();
 				con.clear();
 				
-				play(con, strName, charMenu);
+				charMenu = play(con, strName, charMenu);
 				
 			} else if (charMenu == 'v') {
 				// Show leaderboard
+				// readLeaderboard();
 				con.println("Leaderboard");
 				con.repaint();
 				charMenu = con.readChar();
@@ -52,82 +52,92 @@ public class CPTJeffrey{
 	}
 	
 	// Plays one game of black jack, and returns p - play again, or v - lost
-	public static void play(Console con, String strName, char charMenu){
+	public static char play(Console con, String strName, char charMenu){
 		int intMoney = 1000;
 		int intBet = 0;
 		int intResult = 0;
-		while (charMenu == 'p') {
-			
+		int intGames = 0;
+		char charInput;
+		
+		// Game loop
+		while (true) {
+			// Get bet
 			intBet = getBet(con, intMoney);
-			intResult = game(con, intMoney, intBet);
-			intMoney = intMoney - intBet + intResult * intBet;
 			
-			con.sleep(1000);
-			if (intResult == 0) {
-				con.println("You lost");
-			}
-			else if (intResult == 1) {
-				con.println("You tied");
-			}
-			else {
-				con.println("You won");
-			}
-			
-			/*
-			char charInput;
-			
-			// Win
-			if (intResult > 0) {
-				// Win screen
-				con.println("Win");
-				con.println("Play or quit");
+			// Play a game
+			if (intBet != 0) {
+				intResult = game(con, intMoney, intBet);
+				intGames++;
+				intMoney = intMoney - intBet + intResult * intBet;
 				
-				// Wait for the correct input
+				con.sleep(700);
+				
+				con.setDrawColor(Color.white);
+				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
+				
+				if (intResult == 0) {
+					con.drawString("You lost", 380, 270);
+				}
+				else if (intResult == 1) {
+					con.drawString("You tied", 380, 270);
+				}
+				else {
+					con.drawString("You won", 380, 270);
+				}
+				con.repaint();
+				con.sleep(1500);
+			}
+			
+			// Quit
+			if (intBet == 0) {
+				// Add to leaderboard
+				addToLeaderboard(strName, intMoney);
+				System.out.println("Logged " + strName + " with score $" + intMoney + "in leaderboard");
+				
+				con.setDrawColor(Color.white);
+				con.setDrawFont(new Font("Berlin Sans FB", Font.BOLD, 120));
+				
+				// Background, Nice Game!, and score screen
+				drawGameMenu(con);
+				con.drawString("Nice game!", 360, 10);
+				drawScore(con, strName, intMoney, intGames);
+				con.repaint();
+				
+				// Wait for player to press quit
 				charInput = con.getChar();
-				while (charInput != 'p' && charInput != 'q') {
+				while (charInput != 'q') {
 					charInput = con.getChar();
 				}
-				
-				// Keep playing
-				if (charInput == 'p') continue;
-				
-				// Quit
-				else {
-					// Add to leaderboard
-					// System.out.println(); the logged thing
-					
-					charMenu = 'v';
-					return;
-				}
-				
+				break;
 			}
 			
 			// Lose
-			else {
-				// Lose screen
-				con.println("Lose");
-				con.println("Play or quit");
+			if (intMoney <= 0) {
 				
 				// Add to leaderboard
-				// System.out.println(); the logged thing
+				addToLeaderboard(strName, intMoney);
+				System.out.println("Logged " + strName + " with score $" + intMoney + "in leaderboard");
 				
-				// Wait for the correct input
+				// Background, Bankrupt!, and score screen
+				drawGameMenu(con);
+				con.drawString("Bankrupt!", 363, 10);
+				drawScore(con, strName, intMoney, intGames);
+				con.repaint();
+				
+				// Wait for the player to press 'p' to play again or 'q' to quit
 				charInput = con.getChar();
 				while (charInput != 'p' && charInput != 'q') {
 					charInput = con.getChar();
 				}
 				
-				// Play again
-				if (charInput == 'p') return;
+				// Play new game
+				if (charInput == 'p') return 'p';
 				
 				// Quit
-				else {
-					charMenu = 'v';
-					return;
-				}
+				else break;
 			}
-			*/
 		}
+		return 'v';
 	}
 	
 	public static int game(Console con, int intMoney, int intBet) {	
@@ -193,6 +203,11 @@ public class CPTJeffrey{
 			if (getTotal(intPlayer) > 21) {
 				return 0;
 			}
+			
+			// Player gets 5 cards without busting and wins
+			if (intPlayerHit >= 3) {
+				return 3;
+			}
 		}
 	
 		// Dealer's turn
@@ -205,12 +220,17 @@ public class CPTJeffrey{
 			drawTotals(con, intPlayer, intDealer);
 			con.repaint();
 			
+			con.sleep(500);
+			
 			// Dealer bust
 			if (getTotal(intDealer) > 21) {
 				return 2;
 			}
 			
-			con.sleep(500);
+			// Dealer gets 5 cards without busting and wins
+			if (intDealerHit >= 4) {
+				return 0;
+			}
 		}
 
 		if (getTotal(intDealer) > getTotal(intPlayer)) {
@@ -248,13 +268,13 @@ public class CPTJeffrey{
 	public static void shuffleDeck(int[][] intDeck) {
 		
 		//Bubble sort the random integer to shuffle
-		for (int i = 0; i < intDeck.length - 1; i++) {
-			for (int j = 0; j < intDeck.length - i - 1; j++) {
-				if (intDeck[j][2] > intDeck[j + 1][2]) {
+		for (int inti = 0; inti < intDeck.length - 1; inti++) {
+			for (int intj = 0; intj < intDeck.length - inti - 1; intj++) {
+				if (intDeck[intj][2] > intDeck[intj + 1][2]) {
 					// Swap the cards at those indexes
-					int[] temp = intDeck[j];
-					intDeck[j] = intDeck[j + 1];
-					intDeck[j + 1] = temp;
+					int[] temp = intDeck[intj];
+					intDeck[intj] = intDeck[intj + 1];
+					intDeck[intj + 1] = temp;
 				}
 			}
 		}
@@ -406,19 +426,19 @@ public class CPTJeffrey{
 	// Draws bet menu
 	public static void drawBetButtons(Console con, int intMoney) {
 		con.setDrawFont(new Font("SansSerif", 0, 30));
-		// (1) Bet $100
+		// (1) Bet $50
 		con.setDrawColor(new Color(52, 134, 227));
 		con.fillRoundRect(50, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(1) Bet $100", 103, 500 + 8);
+		con.drawString("(1) Bet $50", 103, 500 + 8);
 		
-		// (2) Bet $200
+		// (2) Bet $100
 		con.setDrawColor(new Color(53, 219, 67));
 		con.fillRoundRect(350, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(2) Bet $200", 403, 500 + 8);
+		con.drawString("(2) Bet $100", 403, 500 + 8);
 		
 		// (3) Bet 50%
 		con.setDrawColor(new Color(235, 226, 54));
@@ -433,6 +453,74 @@ public class CPTJeffrey{
 		
 		con.setDrawColor(Color.black);
 		con.drawString("(4) Bet 100%", 1003, 500 + 8);
+		
+		// (5) Enter amount
+		con.setDrawColor(new Color(230, 44, 214));
+		con.fillRoundRect(50, 600, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(5) Enter amount", 67, 600 + 8);
+		
+		// (q)uit
+		con.setDrawColor(new Color(161, 66, 245));
+		con.fillRoundRect(950, 600, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(q)uit", 1047, 600 + 8);
+		
+		// additional words for info
+		con.setDrawFont(new Font("SansSerif", 0, 17));
+		con.setDrawColor(new Color(30, 30, 30));
+		
+		con.drawString("$" + (int) (intMoney * 0.5), 760, 500 + 40);
+		con.drawString("$" + intMoney, 1060, 500 + 40);
+	}
+	
+	// Draws bet menu without the enter amount text
+	public static void drawBetButtons(Console con, int intMoney, boolean doNotDrawEnterAmount) {
+		con.setDrawFont(new Font("SansSerif", 0, 30));
+		// (1) Bet $50
+		con.setDrawColor(new Color(52, 134, 227));
+		con.fillRoundRect(50, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(1) Bet $50", 103, 500 + 8);
+		
+		// (2) Bet $100
+		con.setDrawColor(new Color(53, 219, 67));
+		con.fillRoundRect(350, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(2) Bet $100", 403, 500 + 8);
+		
+		// (3) Bet 50%
+		con.setDrawColor(new Color(235, 226, 54));
+		con.fillRoundRect(650, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(3) Bet 50%", 703, 500 + 8);
+		
+		// (4) Bet 100%
+		con.setDrawColor(new Color(214, 49, 49));
+		con.fillRoundRect(950, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(4) Bet 100%", 1003, 500 + 8);
+		
+		// (5) Enter amount
+		con.setDrawColor(new Color(230, 44, 214));
+		con.fillRoundRect(50, 600, 280, 70, 30, 30);
+		
+		if (!doNotDrawEnterAmount) {
+			con.setDrawColor(Color.black);
+			con.drawString("(5) Enter amount", 67, 600 + 8);
+		}
+		// (q)uit
+		con.setDrawColor(new Color(161, 66, 245));
+		con.fillRoundRect(950, 600, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(q)uit", 1047, 600 + 8);
 		
 		// additional words for info
 		con.setDrawFont(new Font("SansSerif", 0, 17));
@@ -453,24 +541,46 @@ public class CPTJeffrey{
 		
 		con.repaint();
 		
-		// Get input as 1, 2, 3, or 4
+		// Get input as 1, 2, 3, 4, 5, or q
 		char charInput;
 		while (true) {
 			charInput = con.getChar();
-			if (charInput == '1' || charInput == '2' || charInput == '3' || charInput == '4') {
+			if (charInput == '1' || charInput == '2' || charInput == '3' || charInput == '4' || charInput == '5' || charInput == 'q') {
 				break;
 			}
 		}
 		
 		if (charInput == '1') {
-			return 100;
+			return 50;
 		} else if (charInput == '2') {
-			return 200;
+			return 100;
 		} else if (charInput == '3') {
 			return (int) (intMoney * 0.5);
-		} else {
+		} else if (charInput == '4') {
 			return intMoney;
-		}
+		} else if (charInput == '5') {
+			drawBetButtons(con, intMoney, true);
+			int intBet;
+			
+			while (true) {
+				con.clear();
+				con.setTextFont(new Font("SansSerif", 0, 30));
+				con.setTextColor(Color.black);
+				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + "              $");
+				intBet = con.readInt();
+				if (intBet > intMoney || intBet <= 0) {
+					con.setTextColor(new Color(255, 25, 0));
+					con.sleep(400);
+					con.setTextColor(Color.black);
+					con.sleep(400);
+					con.setTextColor(new Color(255, 25, 0));
+					con.sleep(400);
+				}
+				else break;
+			}
+			con.clear();
+			return intBet;
+		} else return 0;
 	}
 	
 	// Draws a card
@@ -573,6 +683,7 @@ public class CPTJeffrey{
 		}
 	}
 	
+	// Returns the total value of cards in either the player's or dealer's hand
 	public static int getTotal(int[][] intCards) {
 		int intTotal = 0;
 		int intAces = 0;
@@ -598,6 +709,7 @@ public class CPTJeffrey{
 		return intTotal;
 	}
 	
+	// Draws the total value of the cards above the player's hand and below the dealer's hand
 	public static void drawTotals(Console con, int[][] intPlayer, int[][] intDealer) {
 		con.setDrawFont(new Font("SansSerif", Font.BOLD, 33));
 		con.setDrawColor(Color.black);
@@ -606,11 +718,13 @@ public class CPTJeffrey{
 		con.drawString("" + getTotal(intPlayer), 621, 471);
 	}
 	
-	/*public static void hit();
-	public static void stand();
-	public static void doubleDown();
-	*/
+	// Draws the ending score in the game
+	public static void drawScore(Console con, String strName, int intMoney, int intGames) {
+		
+	}
 	
-	
-	
+	// Adds an element to leaderboard.txt
+	public static void addToLeaderboard(String strName, int intMoney) {
+		
+	}
 }
