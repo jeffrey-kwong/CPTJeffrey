@@ -31,9 +31,7 @@ public class CPTJeffrey{
 				String strName = con.readLine();
 				con.clear();
 				
-				int intMoney = 1000;
-				
-				play(con, strName, intMoney, charMenu);
+				play(con, strName, charMenu);
 				
 			} else if (charMenu == 'v') {
 				// Show leaderboard
@@ -53,18 +51,33 @@ public class CPTJeffrey{
 		 
 	}
 	
-	// Plays one game of black jack, and returns p - play again, or l - lost
-	public static void play(Console con, String strName, int intMoney, char charMenu){
+	// Plays one game of black jack, and returns p - play again, or v - lost
+	public static void play(Console con, String strName, char charMenu){
+		int intMoney = 1000;
+		int intBet = 0;
+		int intResult = 0;
 		while (charMenu == 'p') {
-			int[][] intDeck = generateDeck();
-			BufferedImage[] images = generateDeckImages(con);
 			
-			String strResult = game(con, intMoney);
+			intBet = getBet(con, intMoney);
+			intResult = game(con, intMoney, intBet);
+			intMoney = intMoney - intBet + intResult * intBet;
 			
+			con.sleep(1000);
+			if (intResult == 0) {
+				con.println("You lost");
+			}
+			else if (intResult == 1) {
+				con.println("You tied");
+			}
+			else {
+				con.println("You won");
+			}
+			
+			/*
 			char charInput;
 			
 			// Win
-			if (strResult.equals("Win")) {
+			if (intResult > 0) {
 				// Win screen
 				con.println("Win");
 				con.println("Play or quit");
@@ -86,6 +99,7 @@ public class CPTJeffrey{
 					charMenu = 'v';
 					return;
 				}
+				
 			}
 			
 			// Lose
@@ -112,16 +126,102 @@ public class CPTJeffrey{
 					return;
 				}
 			}
+			*/
 		}
 	}
 	
-	public static String game(Console con, int intMoney) {
-		drawGameMenu(con);
+	public static int game(Console con, int intMoney, int intBet) {	
+		int[][] intDeck = generateDeck();
+		BufferedImage[] images = generateDeckImages(con);
+		int[][] intDrawnCards = new int[52][2]; // {x-pos, y-pos}
+		int intCards = 0;
 		
-		con.println("Win or lose? (W, L)");
-		char charInput = con.getChar();
-		if (charInput == 'w') return "Win";
-		else return "Lose";
+		int[][] intPlayer = new int[5][2];
+		int[][] intDealer = new int[5][2];
+		
+		drawGameMenu(con, intMoney, intBet);
+		con.repaint();
+		
+		// Dealing initial cards
+		intCards = drawCard(con, 530, 530, intDeck, images, intCards, intDrawnCards, intPlayer[0], intMoney, intBet);
+		intCards = drawCard(con, 530, 10, intDeck, images, intCards, intDrawnCards, intDealer[0], intMoney, intBet);
+		intCards = drawCard(con, 555, 530, intDeck, images, intCards, intDrawnCards, intPlayer[1], intMoney, intBet);
+		
+		drawGameMenu(con, intMoney, intBet);
+		drawDrawnCards(con, intDeck, images, intCards, intDrawnCards);
+		drawTotals(con, intPlayer, intDealer);
+		con.repaint();
+		
+		// Check if start off with a win
+		if (getTotal(intPlayer) == 21) {
+			return 3;
+		}
+		
+		// Player's turn
+		char charAction = 'h';
+		int intPlayerHit = 0;
+		
+		while (charAction != 's') {
+			// Allow double down on first turn, when card total is between 9-11, and when there is enough money
+			if (intPlayerHit == 0 && (9 <= intPlayer[0][0] + intPlayer[1][0] && intPlayer[0][0] + intPlayer[1][0] <= 11) && intMoney - intBet * 2 >= 0) {
+				charAction = getAction(con, true);
+				
+				// Double down
+				if (charAction == 'd') {
+					intBet *= 2;
+					intCards = drawCard(con, 580 + 25 * intPlayerHit, 530, intDeck, images, intCards, intDrawnCards, intPlayer[2 + intPlayerHit], intMoney, intBet);
+					intPlayerHit++;
+					charAction = 's';
+					con.sleep(400);
+				}
+			}
+			else {
+				charAction = getAction(con, false);
+			}
+			
+			// Hit
+			if (charAction == 'h') {
+				intCards = drawCard(con, 580 + 25 * intPlayerHit, 530, intDeck, images, intCards, intDrawnCards, intPlayer[2 + intPlayerHit], intMoney, intBet);
+				intPlayerHit++;
+			}
+			drawGameMenu(con, intMoney, intBet);
+			drawDrawnCards(con, intDeck, images, intCards, intDrawnCards);
+			drawTotals(con, intPlayer, intDealer);
+			con.repaint();
+			
+			// Bust
+			if (getTotal(intPlayer) > 21) {
+				return 0;
+			}
+		}
+	
+		// Dealer's turn
+		int intDealerHit = 0;
+		while (getTotal(intDealer) < 17) {
+			intCards = drawCard(con, 555 + 25 * intDealerHit, 10, intDeck, images, intCards, intDrawnCards, intDealer[1 + intDealerHit], intMoney, intBet);
+			intDealerHit++;
+			drawGameMenu(con, intMoney, intBet);
+			drawDrawnCards(con, intDeck, images, intCards, intDrawnCards);
+			drawTotals(con, intPlayer, intDealer);
+			con.repaint();
+			
+			// Dealer bust
+			if (getTotal(intDealer) > 21) {
+				return 2;
+			}
+			
+			con.sleep(500);
+		}
+
+		if (getTotal(intDealer) > getTotal(intPlayer)) {
+			// Player lost
+			return 0;
+		} else if (getTotal(intDealer) == getTotal(intPlayer)) {
+			// Player tied
+			return 1;
+		}
+		// player won
+		else return 2;
 	}
 	
 	// Generate a new deck of card
@@ -182,7 +282,7 @@ public class CPTJeffrey{
 	}
 	
 	// Get card image
-	public static BufferedImage getCardImage(int[][] intDeck, BufferedImage[] images, int intCard) {
+	public static BufferedImage getCardImage(Console con, int[][] intDeck, BufferedImage[] images, int intCard) {
 		return images[4 * (intDeck[intCard][0] - 1) + intDeck[intCard][1] - 1];
 	}
 	
@@ -283,8 +383,227 @@ public class CPTJeffrey{
 		
 		// deck of cards
 		con.drawImage(con.loadImage("FaceDownCard.png"), 1030, 140);
+	}
+	
+	// Draws the game screen with the total money and bet displayed
+	public static void drawGameMenu(Console con, int intMoney, int intBet) {
+		drawGameMenu(con);
+		
+		// bet
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 50));
+		con.setDrawColor(Color.white);
+		con.drawString("Money: $" + (intMoney - intBet), 80, 50);
+		con.drawString("Bet: $" + intBet, 80, 110);
+	}
+	
+	// Draw drawn cards
+	public static void drawDrawnCards(Console con, int[][] intDeck, BufferedImage[] images, int intCards, int[][] intDrawnCards) {
+		for (int inti = 0; inti < intCards; inti++) {
+			con.drawImage(getCardImage(con, intDeck, images, inti), intDrawnCards[inti][0], intDrawnCards[inti][1]);
+		}
+	}
+	
+	// Draws bet menu
+	public static void drawBetButtons(Console con, int intMoney) {
+		con.setDrawFont(new Font("SansSerif", 0, 30));
+		// (1) Bet $100
+		con.setDrawColor(new Color(52, 134, 227));
+		con.fillRoundRect(50, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(1) Bet $100", 103, 500 + 8);
+		
+		// (2) Bet $200
+		con.setDrawColor(new Color(53, 219, 67));
+		con.fillRoundRect(350, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(2) Bet $200", 403, 500 + 8);
+		
+		// (3) Bet 50%
+		con.setDrawColor(new Color(235, 226, 54));
+		con.fillRoundRect(650, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(3) Bet 50%", 703, 500 + 8);
+		
+		// (4) Bet 100%
+		con.setDrawColor(new Color(214, 49, 49));
+		con.fillRoundRect(950, 500, 280, 70, 30, 30);
+		
+		con.setDrawColor(Color.black);
+		con.drawString("(4) Bet 100%", 1003, 500 + 8);
+		
+		// additional words for info
+		con.setDrawFont(new Font("SansSerif", 0, 17));
+		con.setDrawColor(new Color(30, 30, 30));
+		
+		con.drawString("$" + (int) (intMoney * 0.5), 760, 500 + 40);
+		con.drawString("$" + intMoney, 1060, 500 + 40);
+	}
+	
+	//  Getting bet input
+	public static int getBet(Console con, int intMoney) {
+		drawGameMenu(con);
+		drawBetButtons(con, intMoney);
+		
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 50));
+		con.setDrawColor(Color.white);
+		con.drawString("Money: $" + intMoney, 80, 50);
 		
 		con.repaint();
+		
+		// Get input as 1, 2, 3, or 4
+		char charInput;
+		while (true) {
+			charInput = con.getChar();
+			if (charInput == '1' || charInput == '2' || charInput == '3' || charInput == '4') {
+				break;
+			}
+		}
+		
+		if (charInput == '1') {
+			return 100;
+		} else if (charInput == '2') {
+			return 200;
+		} else if (charInput == '3') {
+			return (int) (intMoney * 0.5);
+		} else {
+			return intMoney;
+		}
+	}
+	
+	// Draws a card
+	public static int drawCard(Console con, int intx, int inty, int[][] intDeck, BufferedImage[] images, int intCards, int[][] intDrawnCards, int[] intCardSlot, int intMoney, int intBet) {
+		animateDrawCard(con, intx, inty, intDeck, images, intCards, intDrawnCards, intMoney, intBet);
+		intDrawnCards[intCards][0] = intx;
+		intDrawnCards[intCards][1] = inty;
+		
+		intCardSlot[0] = intDeck[intCards][0]; // Put the value of the card in either the dealer's or player's cards
+		intCardSlot[1] = intDeck[intCards][1]; // Put the suit of the card in either the dealer's or player's cards
+		
+		return intCards + 1;
+	}
+	
+	// Animates the card being drawn
+	public static void animateDrawCard(Console con, int intx2, int inty2, int[][] intDeck, BufferedImage[] images, int intCards, int[][] intDrawnCards, int intMoney, int intBet) {
+		int intx1 = 1030;
+		int inty1 = 140;
+		BufferedImage card = con.loadImage("FaceDownCard.png");
+
+		double dbldx = intx2 - intx1;
+		double dbldy = inty2 - inty1;
+
+		for (int inti = 0; inti <= 60; inti++) {
+			double dblPercent = (double) inti / 60;
+
+			// Smooth interpolation using smooth step
+			double dblPercentSmooth = dblPercent * dblPercent * (3 - 2 * dblPercent);
+
+			int currentX = (int) Math.round(intx1 + dbldx * dblPercentSmooth);
+			int currentY = (int) Math.round(inty1 + dbldy * dblPercentSmooth);
+
+			drawGameMenu(con, intMoney, intBet);
+			drawDrawnCards(con, intDeck, images, intCards, intDrawnCards);
+			con.drawImage(card, currentX, currentY);
+
+			con.repaint();
+			con.sleep(3);
+		}
+
+		con.sleep(20); // Small pause after the draw finishes
+	}
+	
+	// Returns whether the player hit, stand, or double down
+	public static char getAction(Console con, boolean doubleDown) {
+		drawActions(con, doubleDown);
+		con.repaint();
+		
+		// Get input as h, s, d
+		char charInput;
+		while (true) {
+			charInput = con.getChar();
+			if (charInput == 'h' || charInput == 's' || charInput == 'd') {
+				break;
+			}
+		}
+		
+		return charInput;
+	}
+	
+	// Draws hit, stand, and double down buttons
+	public static void drawActions(Console con, boolean doubleDown) {
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 32));
+		
+		if (doubleDown) {
+			// Hit
+			con.setDrawColor(new Color(52, 134, 227));
+			con.fillRoundRect(200, 400, 280, 70, 30, 30);
+			
+			con.setDrawColor(Color.black);
+			con.drawString("(h)it", 305, 400 + 8);
+			
+			// Stand
+			con.setDrawColor(new Color(53, 219, 67));
+			con.fillRoundRect(500, 400, 280, 70, 30, 30);
+			
+			con.setDrawColor(Color.black);
+			con.drawString("(s)tand", 580, 400 + 8);
+			
+			// Double down
+			con.setDrawColor(new Color(235, 226, 54));
+			con.fillRoundRect(800, 400, 280, 70, 30, 30);
+			
+			con.setDrawColor(Color.black);
+			con.drawString("(d)ouble down", 823, 400 + 8);
+		} else {
+			// Hit
+			con.setDrawColor(new Color(52, 134, 227));
+			con.fillRoundRect(300, 400, 280, 70, 30, 30);
+			
+			con.setDrawColor(Color.black);
+			con.drawString("(h)it", 405, 400 + 8);
+			
+			// Stand
+			con.setDrawColor(new Color(53, 219, 67));
+			con.fillRoundRect(700, 400, 280, 70, 30, 30);
+			
+			con.setDrawColor(Color.black);
+			con.drawString("(s)tand", 780, 400 + 8);
+		}
+	}
+	
+	public static int getTotal(int[][] intCards) {
+		int intTotal = 0;
+		int intAces = 0;
+		for (int intCard = 0; intCard < intCards.length; intCard++) {
+			if (intCards[intCard][0] == 1) {
+				intTotal += 11;
+				intAces += 1;
+			}
+			else if (intCards[intCard][0] == 11) intTotal += 10;
+			else if (intCards[intCard][0] == 12) intTotal += 10;
+			else if (intCards[intCard][0] == 13) intTotal += 10;
+			else intTotal += intCards[intCard][0];
+		}
+		
+		// Converts aces from 11 to 1 if necessary
+		while (intTotal > 21) {
+			if (intAces > 0) {
+				intTotal -= 10;
+				intAces--;
+			}
+			else break;
+		}
+		return intTotal;
+	}
+	
+	public static void drawTotals(Console con, int[][] intPlayer, int[][] intDealer) {
+		con.setDrawFont(new Font("SansSerif", Font.BOLD, 33));
+		con.setDrawColor(Color.black);
+		
+		con.drawString("" + getTotal(intDealer), 621, 203);
+		con.drawString("" + getTotal(intPlayer), 621, 471);
 	}
 	
 	/*public static void hit();
