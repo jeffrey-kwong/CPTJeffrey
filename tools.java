@@ -305,10 +305,10 @@ public class tools{
 	// Draws the main menu
 	public static void drawMainMenu(Console con) {
 		// background
-		con.drawImage(con.loadImage("MainMenuBackground.png"), 0, 0);
+		con.drawImage(con.loadImage("Images/MainMenuBackground.png"), 0, 0);
 		
 		// title / logo
-		con.drawImage(con.loadImage("BlackJackTitle.png"), (1280 - 750) / 2 , 0);
+		con.drawImage(con.loadImage("Images/BlackJackTitle.png"), (1280 - 750) / 2 , 0);
 		
 		con.setDrawFont(new Font("SansSerif", 0, 27));
 		
@@ -339,7 +339,7 @@ public class tools{
 	// Draws the screen that asks for the player's name
 	public static void drawPregameMenu(Console con) {
 		// background
-		con.drawImage(con.loadImage("BrownBackground.png"), 0, 0);
+		con.drawImage(con.loadImage("Images/BrownBackground.png"), 0, 0);
 		
 		// what is your name text
 		con.setDrawColor(Color.white);
@@ -359,10 +359,10 @@ public class tools{
 	// Draws the game screen
 	public static void drawGameMenu(Console con) {
 		// background
-		con.drawImage(con.loadImage("BlackJackTable.png"), 0, 0);
+		con.drawImage(con.loadImage("Images/BlackJackTable.png"), 0, 0);
 		
 		// deck of cards
-		con.drawImage(con.loadImage("FaceDownCard.png"), 1030, 140);
+		con.drawImage(con.loadImage("Cards/FaceDownCard.png"), 1030, 140);
 	}
 	
 	// Draws the game screen with the total money and bet displayed
@@ -469,18 +469,18 @@ public class tools{
 		
 		// (5) Enter amount
 		con.setDrawColor(new Color(230, 44, 214));
-		con.fillRoundRect(50, 600, 280, 70, 30, 30);
+		con.fillRoundRect(50, 620, 280, 70, 30, 30);
 		
 		if (!doNotDrawEnterAmount) {
 			con.setDrawColor(Color.black);
-			con.drawString("(5) Enter amount", 67, 600 + 8);
+			con.drawString("(5) Enter amount", 67, 620 + 8);
 		}
 		// (q)uit
 		con.setDrawColor(new Color(161, 66, 245));
-		con.fillRoundRect(950, 600, 280, 70, 30, 30);
+		con.fillRoundRect(950, 620, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(q)uit", 1047, 600 + 8);
+		con.drawString("(q)uit", 1047, 620 + 8);
 		
 		// additional words for info
 		con.setDrawFont(new Font("SansSerif", 0, 17));
@@ -524,9 +524,9 @@ public class tools{
 			
 			while (true) {
 				con.clear();
-				con.setTextFont(new Font("SansSerif", 0, 30));
+				con.setTextFont(new Font("SansSerif", 0, 29));
 				con.setTextColor(Color.black);
-				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + "              $");
+				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + "              $");
 				intBet = con.readInt();
 				if (intBet > intMoney || intBet <= 0) {
 					con.setTextColor(new Color(255, 25, 0));
@@ -559,7 +559,7 @@ public class tools{
 	public static void animateDrawCard(Console con, int intx2, int inty2, int[][] intDeck, BufferedImage[] images, int intCards, int[][] intDrawnCards, int intMoney, int intBet) {
 		int intx1 = 1030;
 		int inty1 = 140;
-		BufferedImage card = con.loadImage("FaceDownCard.png");
+		BufferedImage card = con.loadImage("Cards/FaceDownCard.png");
 
 		double dbldx = intx2 - intx1;
 		double dbldy = inty2 - inty1;
@@ -819,7 +819,7 @@ public class tools{
 		TextInputFile leaderboard = new TextInputFile("leaderboard.txt");
 		
 		// background
-		con.drawImage(con.loadImage("LeaderboardBackground.png"), 0, 0);
+		con.drawImage(con.loadImage("Images/LeaderboardBackground.png"), 0, 0);
 		
 		con.setDrawColor(Color.white);
 		
