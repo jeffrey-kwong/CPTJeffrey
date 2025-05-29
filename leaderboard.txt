@@ -1,3 +1,6 @@
+jeffrey
+1
+30000
 heeta
 5
 4000
@@ -18,4 +21,7 @@ ksafljkdsajfklsajkfldsajflkdsjaflksjflka
 0
 jeffrey
 1
+0
+jeffrey
+3
 0
