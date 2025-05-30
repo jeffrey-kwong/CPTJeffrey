@@ -1,8 +1,11 @@
 import arc.*;
+import java.awt.Font;
+import java.awt.Color;
 
 public class CPTJeffrey{
 	public static void main(String[] args) {
 		Console con = new Console("Jeff's Black Jack Game", 1280, 720);
+		con.setTextFont(new Font("SansSerif", Font.BOLD, 30));
 		
 		char charMenu = 'm';
 		char charInput;
@@ -27,7 +30,9 @@ public class CPTJeffrey{
 				tools.drawPregameMenu(con);
 				
 				// setup the reader to the typing box position
-				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n" + "                                           ");
+				con.setTextFont(new Font("SansSerif", Font.BOLD, 23));
+				con.setTextColor(Color.black);
+				con.print("\n\n\n\n\n\n\n\n\n\n\n" + "                                                                      ");
 				String strName = con.readLine();
 				con.clear();
 				

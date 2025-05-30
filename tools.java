@@ -528,6 +528,8 @@ public class tools{
 				con.setTextColor(Color.black);
 				con.print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" + "              $");
 				intBet = con.readInt();
+				
+				// Flash red and black if amount is 0 or less or greater than total money
 				if (intBet > intMoney || intBet <= 0) {
 					con.setTextColor(new Color(255, 25, 0));
 					con.sleep(400);
@@ -781,10 +783,10 @@ public class tools{
 			return newLeaderboardArray;
 		}
 		
-		// Find how many elements have greater or equal money than the new element
+		// Find how many elements have greater money than the new element
 		int intAbove = 0;
 		while (oldLeaderboardArray[intAbove][2] != null) {
-			if (Integer.parseInt(oldLeaderboardArray[intAbove][2]) >= intMoney) {
+			if (Integer.parseInt(oldLeaderboardArray[intAbove][2]) > intMoney) {
 				intAbove++;
 			}
 			else break;
