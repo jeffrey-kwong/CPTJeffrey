@@ -149,8 +149,8 @@ public class tools{
 					drawTotals(con, intPlayer, intDealer);
 					con.repaint();
 					
-					charAction = 's';
 					con.sleep(400);
+					break;
 				}
 			}
 			else {
@@ -169,11 +169,15 @@ public class tools{
 			
 			// Bust
 			if (getTotal(intPlayer) > 21) {
+				// For if double downed, lose double the bet
+				if (charAction == 'd') return -1;
 				return 0;
 			}
 			
 			// Player gets 5 cards without busting and wins
 			if (intPlayerHit >= 3) {
+				// For if double downed, win double the bet
+				if (charAction == 'd') return 5;
 				return 3;
 			}
 		}
@@ -192,24 +196,36 @@ public class tools{
 			
 			// Dealer bust
 			if (getTotal(intDealer) > 21) {
+				// For if double downed, win double the bet
+				if (charAction == 'd') return 3;
 				return 2;
 			}
 			
 			// Dealer gets 5 cards without busting and wins
 			if (intDealerHit >= 4) {
+				// For if double downed, lose double the bet
+				if (charAction == 'd') return -1;
 				return 0;
 			}
 		}
 
 		if (getTotal(intDealer) > getTotal(intPlayer)) {
 			// Player lost
+			// For if double downed, lose double the bet
+			if (charAction == 'd') return -1;
 			return 0;
 		} else if (getTotal(intDealer) == getTotal(intPlayer)) {
 			// Player tied
+			// For if double downed, return double the bet
+			if (charAction == 'd') return 2;
 			return 1;
 		}
 		// player won
-		else return 2;
+		else {
+			// For if double downed, win double the bet
+			if (charAction == 'd') return 3;
+			return 2;
+		}
 	}
 	
 	// Generate a new deck of card
@@ -386,19 +402,19 @@ public class tools{
 	// Draws bet menu
 	public static void drawBetButtons(Console con, int intMoney) {
 		con.setDrawFont(new Font("SansSerif", 0, 30));
-		// (1) Bet $50
+		// (1) Bet $100
 		con.setDrawColor(new Color(52, 134, 227));
 		con.fillRoundRect(50, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(1) Bet $50", 103, 500 + 8);
+		con.drawString("(1) Bet $100", 103, 500 + 8);
 		
-		// (2) Bet $100
+		// (2) Bet $250
 		con.setDrawColor(new Color(53, 219, 67));
 		con.fillRoundRect(350, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(2) Bet $100", 403, 500 + 8);
+		con.drawString("(2) Bet $250", 403, 500 + 8);
 		
 		// (3) Bet 50%
 		con.setDrawColor(new Color(235, 226, 54));
@@ -439,19 +455,19 @@ public class tools{
 	// Draws bet menu without the enter amount text
 	public static void drawBetButtons(Console con, int intMoney, boolean doNotDrawEnterAmount) {
 		con.setDrawFont(new Font("SansSerif", 0, 30));
-		// (1) Bet $50
+		// (1) Bet $100
 		con.setDrawColor(new Color(52, 134, 227));
 		con.fillRoundRect(50, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(1) Bet $50", 103, 500 + 8);
+		con.drawString("(1) Bet $100", 103, 500 + 8);
 		
-		// (2) Bet $100
+		// (2) Bet $250
 		con.setDrawColor(new Color(53, 219, 67));
 		con.fillRoundRect(350, 500, 280, 70, 30, 30);
 		
 		con.setDrawColor(Color.black);
-		con.drawString("(2) Bet $100", 403, 500 + 8);
+		con.drawString("(2) Bet $250", 403, 500 + 8);
 		
 		// (3) Bet 50%
 		con.setDrawColor(new Color(235, 226, 54));
@@ -511,9 +527,9 @@ public class tools{
 		}
 		
 		if (charInput == '1') {
-			return 50;
-		} else if (charInput == '2') {
 			return 100;
+		} else if (charInput == '2') {
+			return 250;
 		} else if (charInput == '3') {
 			return (int) (Math.ceil(intMoney * 0.5));
 		} else if (charInput == '4') {
@@ -729,6 +745,9 @@ public class tools{
 		leaderboardArray = addToLeaderboardArray(leaderboardArray, strName, intGames, intMoney);
 		
 		int intLength = getLeaderboardArrayLength(leaderboardArray);
+		
+		// Stop logging leaderboard elements after 9
+		if (intLength > 9) intLength = 9;
 		
 		TextOutputFile leaderboardOutput = new TextOutputFile("leaderboard.txt");
 		

@@ -1,9 +1,15 @@
 Jerper
 3
 12000
+carsten
+2
+4000
 heeta
 2
 4000
+theo
+1
+1120
 Jerper
 0
 1000
@@ -19,9 +25,3 @@ erera
 jre
 0
 1000
-jer
-0
-1000
-adrian
-1
-0
