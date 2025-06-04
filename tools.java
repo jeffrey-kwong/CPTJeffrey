@@ -135,7 +135,7 @@ public class tools{
 		
 		while (charAction != 's') {
 			// Allow double down on first turn, when card total is between 9-11, and when there is enough money
-			if (intPlayerHit == 0 && (9 <= intPlayer[0][0] + intPlayer[1][0] && intPlayer[0][0] + intPlayer[1][0] <= 11) && intMoney - intBet * 2 >= 0) {
+			if (intPlayerHit == 0 && (9 <= intPlayer[0][0] + intPlayer[1][0] && intPlayer[0][0] + intPlayer[1][0] <= 11)) {
 				charAction = getAction(con, true);
 				
 				// Double down
@@ -453,7 +453,7 @@ public class tools{
 	}
 	
 	// Draws bet menu without the enter amount text
-	public static void drawBetButtons(Console con, int intMoney, boolean doNotDrawEnterAmount) {
+	public static void drawBetButtons(Console con, int intMoney, boolean boolDoNotDrawEnterAmount) {
 		con.setDrawFont(new Font("SansSerif", 0, 30));
 		// (1) Bet $100
 		con.setDrawColor(new Color(52, 134, 227));
@@ -487,7 +487,7 @@ public class tools{
 		con.setDrawColor(new Color(230, 44, 214));
 		con.fillRoundRect(50, 620, 280, 70, 30, 30);
 		
-		if (!doNotDrawEnterAmount) {
+		if (!boolDoNotDrawEnterAmount) {
 			con.setDrawColor(Color.black);
 			con.drawString("(5) Enter amount", 67, 620 + 8);
 		}
@@ -603,8 +603,8 @@ public class tools{
 	}
 	
 	// Returns whether the player hit, stand, or double down
-	public static char getAction(Console con, boolean doubleDown) {
-		drawActions(con, doubleDown);
+	public static char getAction(Console con, boolean boolDoubleDown) {
+		drawActions(con, boolDoubleDown);
 		con.repaint();
 		
 		// Get input as h, s, d
@@ -620,10 +620,10 @@ public class tools{
 	}
 	
 	// Draws hit, stand, and double down buttons
-	public static void drawActions(Console con, boolean doubleDown) {
+	public static void drawActions(Console con, boolean boolDoubleDown) {
 		con.setDrawFont(new Font("SansSerif", Font.BOLD, 32));
 		
-		if (doubleDown) {
+		if (boolDoubleDown) {
 			// Hit
 			con.setDrawColor(new Color(52, 134, 227));
 			con.fillRoundRect(200, 400, 280, 70, 30, 30);
@@ -724,18 +724,18 @@ public class tools{
 	// Formats the leaderboard into a 2D String array
 	public static String[][] getLeaderboard() {
 		TextInputFile leaderboard = new TextInputFile("leaderboard.txt");
-		String[][] leaderboardArray = new String[100][3];
+		String[][] strLeaderboardArray = new String[100][3];
 		
 		int inti = 0;
 		while (leaderboard.eof() == false) {
-			leaderboardArray[inti][0] = leaderboard.readLine();
-			leaderboardArray[inti][1] = leaderboard.readLine();
-			leaderboardArray[inti][2] = leaderboard.readLine();
+			strLeaderboardArray[inti][0] = leaderboard.readLine();
+			strLeaderboardArray[inti][1] = leaderboard.readLine();
+			strLeaderboardArray[inti][2] = leaderboard.readLine();
 			inti++;
 		}
 		
 		leaderboard.close();
-		return leaderboardArray;
+		return strLeaderboardArray;
 	}
 	
 	// Adds an element to the leaderboard file
@@ -779,33 +779,33 @@ public class tools{
 	}
 	
 	// Returns the amount of elements in a leaderboard array
-	public static int getLeaderboardArrayLength(String[][] leaderboardArray) {
+	public static int getLeaderboardArrayLength(String[][] strLeaderboardArray) {
 		int intLength = 0;
-		while (leaderboardArray[intLength][0] != null) {
+		while (strLeaderboardArray[intLength][0] != null) {
 			intLength++;
 		}
 		return intLength;
 	}
 	
 	// Adds an element to a leaderboard array and sorts it by amount of money
-	public static String[][] addToLeaderboardArray(String[][] oldLeaderboardArray, String strName, int intGames, int intMoney) {
-		String[][] newLeaderboardArray = new String[100][3];
+	public static String[][] addToLeaderboardArray(String[][] strOldLeaderboardArray, String strName, int intGames, int intMoney) {
+		String[][] strNewLeaderboardArray = new String[100][3];
 		
 		// Find leaderboard length
 		int intLength = getLeaderboardLength();
 		
 		// Check if file is empty
 		if (intLength == 0) {
-			newLeaderboardArray[0][0] = strName;
-			newLeaderboardArray[0][1] = "" + intGames;
-			newLeaderboardArray[0][2] = "" + intMoney;
-			return newLeaderboardArray;
+			strNewLeaderboardArray[0][0] = strName;
+			strNewLeaderboardArray[0][1] = "" + intGames;
+			strNewLeaderboardArray[0][2] = "" + intMoney;
+			return strNewLeaderboardArray;
 		}
 		
 		// Find how many elements have greater money than the new element
 		int intAbove = 0;
-		while (oldLeaderboardArray[intAbove][2] != null) {
-			if (Integer.parseInt(oldLeaderboardArray[intAbove][2]) > intMoney) {
+		while (strOldLeaderboardArray[intAbove][2] != null) {
+			if (Integer.parseInt(strOldLeaderboardArray[intAbove][2]) > intMoney) {
 				intAbove++;
 			}
 			else break;
@@ -814,25 +814,25 @@ public class tools{
 		for (int intElement = 0; intElement < intLength + 1; intElement++) {
 			// Elements that are greater than the new one
 			if (intElement < intAbove) {
-				newLeaderboardArray[intElement][0] = oldLeaderboardArray[intElement][0];
-				newLeaderboardArray[intElement][1] = oldLeaderboardArray[intElement][1];
-				newLeaderboardArray[intElement][2] = oldLeaderboardArray[intElement][2];
+				strNewLeaderboardArray[intElement][0] = strOldLeaderboardArray[intElement][0];
+				strNewLeaderboardArray[intElement][1] = strOldLeaderboardArray[intElement][1];
+				strNewLeaderboardArray[intElement][2] = strOldLeaderboardArray[intElement][2];
 			}
 			// Elements that are below the new one
 			else if (intElement > intAbove) {
-				newLeaderboardArray[intElement][0] = oldLeaderboardArray[intElement - 1][0];
-				newLeaderboardArray[intElement][1] = oldLeaderboardArray[intElement - 1][1];
-				newLeaderboardArray[intElement][2] = oldLeaderboardArray[intElement - 1][2];
+				strNewLeaderboardArray[intElement][0] = strOldLeaderboardArray[intElement - 1][0];
+				strNewLeaderboardArray[intElement][1] = strOldLeaderboardArray[intElement - 1][1];
+				strNewLeaderboardArray[intElement][2] = strOldLeaderboardArray[intElement - 1][2];
 			}
 			// The new element placement
 			else {
-				newLeaderboardArray[intElement][0] = strName;
-				newLeaderboardArray[intElement][1] = "" + intGames;
-				newLeaderboardArray[intElement][2] = "" + intMoney;
+				strNewLeaderboardArray[intElement][0] = strName;
+				strNewLeaderboardArray[intElement][1] = "" + intGames;
+				strNewLeaderboardArray[intElement][2] = "" + intMoney;
 			}
 		}
 		
-		return newLeaderboardArray;
+		return strNewLeaderboardArray;
 	}
 	
 	// Draws the leaderboard menu

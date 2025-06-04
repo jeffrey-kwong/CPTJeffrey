@@ -10,6 +10,9 @@ heeta
 theo
 1
 1120
+jeff
+1
+1100
 Jerper
 0
 1000
@@ -20,8 +23,5 @@ ereasd
 0
 1000
 erera
-0
-1000
-jre
 0
 1000
