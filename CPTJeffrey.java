@@ -1,3 +1,8 @@
+// Jeffrey Kwong
+// Jeff's Black Jack Game
+// June 12, 2025
+// Version 1.0
+
 import arc.*;
 import java.awt.Font;
 import java.awt.Color;
